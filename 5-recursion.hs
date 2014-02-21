@@ -1,3 +1,5 @@
+import System.Environment
+
 -- Raise x to the power y, using recursion
 -- For example, power 5 2 = 25
 power :: (Fractional a) => Int -> Int -> a
@@ -64,7 +66,7 @@ stepReverseSign a step = (-1) * (signum a) * ((abs a) + step)
  - You may find the stepReverseSign function handy
  -}
 
-piCalc :: (Floating a, Integral b, Ord a) => a -> (a, b)
+piCalc :: (Show a, Show b, Floating a, Integral b, Ord a) => a -> (a, b)
 piCalc a = piCalc' 1 0 a 0
 
 piCalc' :: (Ord a, Floating a, Integral b) => a -> a -> a -> b -> (a, b)
@@ -130,3 +132,17 @@ quicksort :: (Ord a) => [a] -> [a]
 quicksort [] = []
 quicksort (a:as) = (quicksort left) ++ [a] ++ (quicksort right)
   where (left, right) = divide2 a as
+
+main :: IO ()
+main = do
+  [tol] <- getArgs
+  let result = piCalc (read tol :: Double)
+  print (show result)
+
+
+-- blog post
+-- why does main method need to be at end in order for :l to load all the things?
+-- reading the tol as a Float vs Double
+-- Double is how it's read in the ghci, why?
+-- tail recusion - how can we get this method to complete more iterations?
+-- it stack overflows when run through the main method
