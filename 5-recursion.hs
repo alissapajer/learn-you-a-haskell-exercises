@@ -1,15 +1,28 @@
 -- Raise x to the power y, using recursion
 -- For example, power 5 2 = 25
-power :: Int -> Int -> Int
-power x y = undefined
+power :: (Fractional a) => Int -> Int -> a
+power x y
+  | y == 0 = 1
+  | y < 0 = (1 / intX) * (power x (y+1))
+  | otherwise = intX * (power x (y-1))
+  where intX = fromIntegral x
 
 -- create a list of length n of the fibbonaci sequence in reverse order
 -- examples: fib 0 = [0]
--- 	     fib 1 = [1, 0]
+-- 	     fib 1 = [1,0]
 --	     fib 10 = [55,34,21,13,8,5,3,2,1,1,0]	
 -- try to use a where clause
-fib :: (Num a, Eq a) => a -> [a]
-fib x = undefined
+fib :: (Num a, Ord a) => a -> [a]
+fib x
+  | x < 0 = error "not defined"
+  | x == 0 = [0]
+  | x == 1 = 1:(fib 0)
+fib x = (first + second) : rest
+  where rest = fib (x-1)
+        (first, second) = case rest of (x:y:_) -> (x,y)
+                                       [x] -> (x,0)  -- TODO we should never hit these two last cases
+                                       [] -> (0,0)
+  
 
 -- This is not recursive, but have a go anyway.
 -- Create a function which takes two parameters, a number and a step
@@ -18,7 +31,7 @@ fib x = undefined
 --			    stepReverseSign -3 1 = 4
 --			    stepReverseSign 1 2 = -3
 stepReverseSign :: (Fractional a, Ord a) => a -> a -> a
-stepReverseSign a = undefined
+stepReverseSign a step = (-1) * (signum a) * ((abs a) + step)
 
 {- Lets calculate pi.
  - The Leibniz formula for pi (http://en.wikipedia.org/wiki/Leibniz_formula_for_%CF%80)
@@ -51,9 +64,69 @@ stepReverseSign a = undefined
  - You may find the stepReverseSign function handy
  -}
 
-piCalc :: (Fractional a, Integral b, Ord a) => a -> (a, b)
-piCalc a = undefined
+piCalc :: (Floating a, Integral b, Ord a) => a -> (a, b)
+piCalc a = piCalc' 1 0 a 0
 
-piCalc' :: (Ord a, Fractional a, Integral b) => a -> a -> a -> b -> (a, b)
-piCalc' w x y z = undefined
+piCalc' :: (Ord a, Floating a, Integral b) => a -> a -> a -> b -> (a, b)
+piCalc' den prevPi tol iters
+  | abs (newPi - prevPi) <= tol = (prevPi, iters)
+  | otherwise = piCalc' newDen newPi tol (iters + 1)
+  where newPi = prevPi + (4 / den)
+        newDen = stepReverseSign den 2
 
+myMax :: (Ord a) => [a] -> a
+myMax []  = undefined
+myMax [x] = x
+myMax xs
+  | (head xs) > (last xs) = myMax (init xs)
+  | otherwise             = myMax (tail xs)
+
+myMax2 :: (Ord a) => [a] -> a
+myMax2 []     = undefined
+myMax2 [x]    = x
+myMax2 (x:xs) = x `max` myMax2 xs
+
+myReplicate :: Int -> a -> [a]
+myReplicate b a
+  | b < 1 = []
+  | otherwise = take b (repeat a)
+
+myReplicate2 :: Int -> a -> [a]
+myReplicate2 b a
+  | b < 1 = []
+  | otherwise = a:(myReplicate (b-1) a)
+
+myTake :: Int -> [a] -> [a]
+myTake i _
+  | i < 1 = []
+myTake _ []     = []
+myTake i (x:xs) = x:(myTake (i-1) xs)
+
+myZip :: [a] -> [b] -> [(a,b)]
+myZip [] _          = []
+myZip _ []          = []
+myZip (a:as) (b:bs) = (a,b) : myZip as bs
+
+myElem :: (Eq a) => a -> [a] -> Bool
+myElem _ [] = False
+myElem a (x:xs)
+  | a == x    = True
+  | otherwise = myElem a xs
+
+divide :: (Ord a) => a -> [a] -> ([a],[a])
+divide _ [] = ([],[])
+divide p (a:as)
+  | a < p = (a:(fst rec), snd rec)
+  | otherwise = (fst rec, a:(snd rec))
+  where rec = divide p as
+
+divide2 :: (Ord a) => a -> [a] -> ([a],[a])
+divide2 _ [] = ([],[])
+divide2 p as = (left, right)
+  where left = [x | x <- as, x < p]
+        right = [x | x <- as, x >= p]
+  
+quicksort :: (Ord a) => [a] -> [a]
+quicksort [] = []
+quicksort (a:as) = (quicksort left) ++ [a] ++ (quicksort right)
+  where (left, right) = divide2 a as
