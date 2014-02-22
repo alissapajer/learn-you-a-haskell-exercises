@@ -42,3 +42,36 @@ higherOrderSequenceApplication = undefined
 -- Define a factorial method using the higherOrderSequenceAppliction
 hoFactorial :: Int -> Int
 hoFactorial = undefined
+
+multThree :: (Num a) => a -> a -> a -> a
+multThree x y z = x * y * z
+
+divideByTwenty :: (Fractional a) => a -> a
+divideByTwenty = (/20)
+
+isUpperCase :: Char -> Bool
+isUpperCase = (`elem` ['A'..'Z'])
+
+applyTwice :: (a -> a) -> a -> a
+applyTwice f x = f (f x)
+
+myZipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+myZipWith _ [] _ = [] 
+myZipWith _ _ [] = []
+myZipWith f (a:as) (b:bs) = (f a b):(zipWith f as bs)
+
+threeFunc :: Char -> Bool -> String
+threeFunc char bool = char : (show bool)
+-- flip threeFunc :: (Bool -> Char -> String) 
+-- (flip threeFunc) True 'a' == threeFunc 'a' True
+
+flipThreeFunc :: Bool -> Char -> String
+flipThreeFunc bool char = threeFunc char bool
+
+flipV2 :: (Char -> Bool -> String) -> (Bool -> Char -> String)
+flipV2 f bool char = f char bool
+
+myFlip :: (a -> b -> c) -> (b -> a -> c)
+myFlip f b a = f a b
+
+--myZipWith (myFlip threeFunc) [True, False, True] "wejkdslfsd"
