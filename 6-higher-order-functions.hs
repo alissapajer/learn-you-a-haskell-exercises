@@ -73,5 +73,41 @@ flipV2 f bool char = f char bool
 
 myFlip :: (a -> b -> c) -> (b -> a -> c)
 myFlip f b a = f a b
-
 --myZipWith (myFlip threeFunc) [True, False, True] "wejkdslfsd"
+
+myMap :: (a -> b) -> [a] -> [b]
+myMap _ [] = []
+myMap f (a:as) = f a : myMap f as
+
+myFilter :: (a -> Bool) -> [a] -> [a]
+myFilter _ [] = []
+myFilter f (x:xs)
+  | f x = x : myFilter f xs
+  | otherwise = myFilter f xs
+
+filterNotNull :: [[a]] -> [[a]]
+filterNotNull = filter notNull
+  where notNull :: [a] -> Bool 
+        notNull as = not (null as)
+
+-- find the sum of all odd squares that are smaller than 10,000
+oddSqrs :: Integer
+oddSqrs = sum [x^2 | x <- [1..(floor (sqrt 10000))], odd x]
+oddSqrsV2 = sum (takeWhile (<10000) [x^2 | x <- [1..], odd x])
+oddSqrsV3 = sum (takeWhile (<10000) (filter odd (map (^2) [1..])))
+
+collatzSeq :: (Integral a) => a -> [a]
+collatzSeq 1 = [1]
+collatzSeq x
+  | odd x = x : collatzSeq oddRes
+  | otherwise = x : collatzSeq evenRes
+  where oddRes = (3 * x) + 1
+        evenRes = x `div` 2
+
+-- for all starting numbers between 1 and 100, how many Collatz chains have a length greater than 15
+collatzLarge :: Int
+collatzLarge = length large
+  where large = filter (>15) lengths
+        lengths = [length (collatzSeq x) | x <- [1..100]]
+
+thirtySix = ((map (*) [1,2,3,4,5]) !! 3) 9
