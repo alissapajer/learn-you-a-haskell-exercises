@@ -2,30 +2,39 @@
 -- Example: sumInts 0 1 = 1
 --          sumInts 1 3 = 6
 sumInts :: Int -> Int -> Int
-sumInts a b = undefined
+sumInts a b
+  | a == b = a
+  | a < b = a + (sumInts (a + 1) b)
+  | otherwise = undefined
 
 -- Define a square function
 sq :: Int -> Int
-sq x = undefined
+sq x = x * x
 
 -- Sum the squares between two numbers. This function should be similar to the sumInts function
 sumSquares :: Int -> Int -> Int
-sumSquares a b = undefined
+sumSquares a b
+  | a == b = sq a
+  | a < b = sq a + (sumSquares (a + 1) b)
+  | otherwise = undefined
 
 -- Define a higher order sum function which accepts an (Int -> Int) function to apply to all integers between two values.
 -- Again this should look similar to the sumInts and sumSquares functions
 higherOrderSum :: (Int -> Int) -> Int -> Int -> Int
-higherOrderSum intApplication a b = undefined
+higherOrderSum intApp a b
+  | a == b = intApp a
+  | a < b = intApp a + (higherOrderSum intApp (a + 1) b)
+  | otherwise = undefined
 
 -- Define the square sum in terms of higherOrderSum
 hoSumSquares :: Int -> Int -> Int
-hoSumSquares = undefined
+hoSumSquares = higherOrderSum sq
 
 -- Define the sum between two values in terms of higherOrderSum
 -- Note there is no parameter on the function definition
 -- Try to use a lambda if possible
 hoSumInts :: Int -> Int -> Int
-hoSumInts = undefined
+hoSumInts = higherOrderSum id
 
 -- Create a new higher order method which generalises over the function provided by sumInts (That is, parameterize (+) :: Int -> Int -> Int) between a and b
 -- This will give the ability to perform utilities such as the prodcut of all squares (or any other Int -> Int function) between a and b
@@ -37,11 +46,16 @@ hoSumInts = undefined
 --  - A function to apply to each value, op :: Int -> Int
 --  - A function to apply between each value, f :: Int -> Int -> Int
 --  - A value to return in the base case when a > b, z :: Int
-higherOrderSequenceApplication = undefined
+hoSeqApplication :: (Int -> Int) -> (Int -> Int -> Int) -> Int -> Int -> Int
+hoSeqApplication intApp binaryApp a b
+  | a == b = intApp a
+  | a < b = intApp a `binaryApp` (hoSeqApplication intApp binaryApp (a + 1) b)
+  | otherwise = undefined
 
 -- Define a factorial method using the higherOrderSequenceAppliction
 hoFactorial :: Int -> Int
-hoFactorial = undefined
+hoFactorial 0 = 1
+hoFactorial a = hoSeqApplication id (*) 1 a
 
 multThree :: (Num a) => a -> a -> a -> a
 multThree x y z = x * y * z
@@ -111,3 +125,57 @@ collatzLarge = length large
         lengths = [length (collatzSeq x) | x <- [1..100]]
 
 thirtySix = ((map (*) [1,2,3,4,5]) !! 3) 9
+
+foldSum :: (Num a) => [a] -> a
+foldSum = foldl (+) 0
+
+foldlElem :: (Eq a) => a -> [a] -> Bool
+foldlElem x ys = foldl (inner x) False ys 
+
+inner :: (Eq a) => a -> Bool -> a -> Bool
+inner x acc y
+  | x == y = True
+  | otherwise = acc 
+
+foldrElem :: (Eq a) => a -> [a] -> Bool
+foldrElem x ys = foldr (flip (inner x)) False ys
+
+foldrMap :: (a -> b) -> [a] -> [b]
+foldrMap f xs = foldr (\x acc -> f x : acc) [] xs
+
+foldrFilter :: (a -> Bool) -> [a] -> [a]
+foldrFilter f xs = foldr (\x acc -> if (f x) then (x : acc) else acc) [] xs 
+
+foldlLast :: [a] -> a
+foldlLast = foldl1 (\_ x -> x) 
+
+--what's the smallest natural n>0 such that the sum of the square roots of all naturals <n is greater than 1000
+sumSqrs :: Int
+sumSqrs = length (takeWhile (<1000) (scanl1 (+) (map sqrt [1..]))) + 1
+
+--an example where func is only evaluated once, I hope!
+conditional :: (Ord a, Num a) => a -> a
+conditional x = if func > 12 then func else x
+  where func = x + 5
+
+example = sum (filter (> 10) (map (*2) [2..10]))
+example2 = sum $ filter (> 10) $ map (*2) [2..10]
+
+negativeList :: (Num a) => [a] -> [a]
+negativeList = map $ negate . abs
+
+dotExample = sum (replicate 5 (max 6.7 8.9))
+dotExample2 = sum . replicate 5 . max 6.7 $ 8.9
+
+headMap = head $ map (+1) [4,5,6,7]
+headMap2 = ($) head (map (+1) [4,5,6,7])
+
+-- sometimes $ used in place of right parens
+ex = sum (filter (>10) [5,6,7,11,12])
+ex2 = sum $ filter (>10) [5,6,7,11,12]
+
+--sometimes left - where everything to the right is our function argument
+--putting a $ at the end means you create the function fully before applying it
+rep = (replicate 5 . max 6) 7
+rep2 = replicate 5 . max 6 $ 7
+rep3 = replicate 5 (max 6 7)
